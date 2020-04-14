@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baizhi.dao.VideoDao">
+
+    <resultMap type="com.baizhi.entity.Video" id="VideoMap">
+        <result property="id" column="id" jdbcType="VARCHAR"/>
+        <result property="title" column="title" jdbcType="VARCHAR"/>
+        <result property="brief" column="brief" jdbcType="VARCHAR"/>
+        <result property="path" column="path" jdbcType="VARCHAR"/>
+        <result property="cover" column="cover" jdbcType="VARCHAR"/>
+        <result property="publishDate" column="publish_date" jdbcType="TIMESTAMP"/>
+        <result property="categoryId" column="category_id" jdbcType="VARCHAR"/>
+        <result property="groupId" column="group_id" jdbcType="VARCHAR"/>
+        <result property="userId" column="user_id" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="VideoMap">
+        select
+          id, title, brief, path, cover, publish_date, category_id, group_id, user_id
+        from yingxue.video
+        where id = #{id}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="VideoMap">
+        select
+          id, title, brief, path, cover, publish_date, category_id, group_id, user_id
+        from yingxue.video
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="VideoMap">
+        select
+          id, title, brief, path, cover, publish_date, category_id, group_id, user_id
+        from yingxue.video
+        <where>
+            <if test="id != null and id != ''">
+                and id = #{id}
+            </if>
+            <if test="title != null and title != ''">
+                and title = #{title}
+            </if>
+            <if test="brief != null and brief != ''">
+                and brief = #{brief}
+            </if>
+            <if test="path != null and path != ''">
+                and path = #{path}
+            </if>
+            <if test="cover != null and cover != ''">
+                and cover = #{cover}
+            </if>
+            <if test="publishDate != null">
+                and publish_date = #{publishDate}
+            </if>
+            <if test="categoryId != null and categoryId != ''">
+                and category_id = #{categoryId}
+            </if>
+            <if test="groupId != null and groupId != ''">
+                and group_id = #{groupId}
+            </if>
+            <if test="userId != null and userId != ''">
+                and user_id = #{userId}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into yingxue.video(id,title, brief, path, cover, publish_date, category_id, group_id, user_id)
+        values (#{id},#{title}, #{brief}, #{path}, #{cover}, #{publishDate}, #{categoryId}, #{groupId}, #{userId})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update yingxue.video
+        <set>
+            <if test="title != null and title != ''">
+                title = #{title},
+            </if>
+            <if test="brief != null and brief != ''">
+                brief = #{brief},
+            </if>
+            <if test="path != null and path != ''">
+                path = #{path},
+            </if>
+            <if test="cover != null and cover != ''">
+                cover = #{cover},
+            </if>
+            <if test="publishDate != null">
+                publish_date = #{publishDate},
+            </if>
+            <if test="categoryId != null and categoryId != ''">
+                category_id = #{categoryId},
+            </if>
+            <if test="groupId != null and groupId != ''">
+                group_id = #{groupId},
+            </if>
+            <if test="userId != null and userId != ''">
+                user_id = #{userId},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from yingxue.video where id = #{id}
+    </delete>
+
+
+    <!--查询数据条数-->
+    <select id="queryCount" resultType="java.lang.Integer">
+        select count(id) from yingxue.video;
+    </select>
+
+    <sql id="querySql">
+        c.cate_name cateName,
+        v.id id,v.title vTitle,v.brief vBrief,v.path vPath,v.cover vCover,v.publish_date vPublishDate,
+        u.head_img headImg
+    </sql>
+    <select id="queryByReleaseTime" resultType="com.baizhi.po.VideoPo">
+        select <include refid="querySql" />
+        from category c
+        right join video v on c.id=v.category_id
+        left join user u on v.user_id=u.id
+        order by v.publish_date desc
+    </select>
+
+</mapper>

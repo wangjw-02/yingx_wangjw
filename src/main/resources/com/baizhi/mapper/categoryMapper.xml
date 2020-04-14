@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC " http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.baizhi.dao.CategoryDAO">
+    <resultMap type="com.baizhi.entity.Category" id="CategoryMap">
+        <result property="id" column="id"/>
+        <result property="cateName" column="cate_name" jdbcType="VARCHAR"/>
+        <result property="levels" column="levels" jdbcType="VARCHAR"/>
+        <result property="parentId" column="parent_id" jdbcType="VARCHAR"/>
+    </resultMap>
+<!--查询所有一级类别-->
+    <select id="queryAllFirst" resultMap="CategoryMap">
+        select id,cate_name,levels,parent_id from category where levels='1'
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="queryAllFirstCount" resultType="java.lang.Integer">
+        select count(id) from category where levels='1'
+    </select>
+
+<!--查询某一级类别下的所有二级类别-->
+    <select id="queryAllSecond" resultMap="CategoryMap">
+        select id,cate_name,levels,parent_id from category where parent_id=#{parId}
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="queryAllSecondCount" resultType="java.lang.Integer">
+        select count(id) from category where parent_id=#{parId}
+    </select>
+    
+    <insert id="addCategory">
+        insert into category (id,cate_name,levels,parent_id) values (#{id},#{cateName},#{levels},#{parentId})
+    </insert>
+
+    <!--删除某个类别-->
+    <delete id="delCategory">
+        delete from category where id=#{id}
+    </delete>
+
+    <!--根据id修改类别信息-->
+    <update id="updateCategory" parameterType="Category">
+        update category
+        <set>
+            <if test="cateName != null and cateName != ''">
+                cate_name = #{cateName},
+            </if>
+            <if test="levels != null and levels != ''">
+                levels = #{levels},
+            </if>
+            <if test="parentId != null and parentId != ''">
+                parent_id = #{parentId},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--查询所有的二级类别-->
+    <select id="queryAllTwo" resultMap="CategoryMap">
+        select id,cate_name,levels,parent_id from category where levels='2'
+    </select>
+
+
+    <resultMap type="com.baizhi.po.CategoryPo" id="CategoryPoMap">
+        <result property="id" column="id"/>
+        <result property="cateName" column="cate_name" jdbcType="VARCHAR"/>
+        <result property="levels" column="levels" jdbcType="VARCHAR"/>
+        <result property="parentId" column="parent_id" jdbcType="VARCHAR"/>
+        <collection property="categoryList" ofType="com.baizhi.po.CategoryPo">
+            <result property="id" column="tId"/>
+            <result property="cateName" column="tCateName" jdbcType="VARCHAR"/>
+            <result property="levels" column="tLevels" jdbcType="VARCHAR"/>
+            <result property="parentId" column="tParentId" jdbcType="VARCHAR"/>
+        </collection>
+    </resultMap>
+
+
+    <select id="queryAllCategory" resultMap="CategoryPoMap">
+        select c1.id,c1.cate_name,c1.levels,c1.parent_id,c2.id tId,c2.cate_name tCateName,c2.levels tLevels,c2.parent_id tParentId
+        from category c1
+        inner join category c2 on c2.parent_id=c1.id
+    </select>
+
+
+</mapper>
